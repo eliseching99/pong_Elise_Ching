@@ -5,7 +5,7 @@ function pong() {
   let scoreEnemy:number =0;
   let scorePlayer:number= 0;
     //xvelocity is for the speed going left and right
-let xvelocity: number = 1;
+let xvelocity: number = 1.5;
 //yvelocity is for the speed going up and down
 let yvelocity: number = 0.9; 
 
@@ -36,7 +36,8 @@ let yvelocity: number = 0.9;
     const animate = interval(5)
     .pipe(
 
-      map(() => String(1.5 + Number(ball.getAttribute('cx')))),
+      map(() => String(xvelocity + Number(ball.getAttribute('cx')))),
+
 
     )
     .subscribe(val => ball.setAttribute('cx', val));
@@ -48,7 +49,7 @@ let yvelocity: number = 0.9;
       map(()=> String(Number(y_velocity)*Math.random()+Number(ball.getAttribute('cy'))))
 
     )
-    .subscribe(val => {y_velocity>0?Number(y_velocity)*-1:-y_velocity;ball.setAttribute('cy', String(Number(val)*Number(y_velocity)));console.log(y_velocity) });
+    .subscribe(val => {ball.setAttribute('cy', val);paddleEnemy.setAttribute('y',ball.getAttribute('cy'))});
 
 
     var text_enemy:Element = document.createElementNS(svg.namespaceURI,"text");
@@ -59,18 +60,41 @@ let yvelocity: number = 0.9;
     text_enemy.textContent="Enemy: "+scoreEnemy.toString();
     svg.appendChild(text_enemy)
 
-    const updatescore= interval(5)
+    const updatescorePlayer= interval(5)
     .pipe(
       filter(_=> Number(ball.getAttribute("cx"))>600 && scoreEnemy<7 && scorePlayer<7)
 
     )
-    .subscribe(()=>{scoreEnemy+=1; ball.setAttribute('cx','300');    text_enemy.textContent="Enemy: "+scoreEnemy.toString()
+    .subscribe(()=>{scoreEnemy+=1; ball.setAttribute('cx','300');  xvelocity=1;y_velocity=1;  text_enemy.textContent="Enemy: "+scoreEnemy.toString()
 
   })
-  const collisions=interval(5).pipe(
-    filter(_=>isCollide(ball,paddlePlayer))
+  const updatescoreEnemy= interval(5)
+  .pipe(
+    filter(_=> Number(ball.getAttribute("cx"))<0 && scoreEnemy<7 && scorePlayer<7)
+
   )
-  .subscribe(()=>{console.log("yes")})
+  .subscribe(()=>{scorePlayer+=1; ball.setAttribute('cx','300');  xvelocity=1;y_velocity=1;  newText.textContent="Player: "+scorePlayer.toString()
+
+})
+
+  
+  const collisions=interval(5).pipe(
+    filter(  _=>isCollide(paddlePlayer,ball)),
+
+  )
+  .subscribe(()=>{xvelocity=-xvelocity ;y_velocity=-y_velocity; console.log(ball.getAttribute('cx'))})
+
+  const collisions_wall=interval(5).pipe(
+    filter(  _=>hitWall(ball,svg)),
+
+  )
+  .subscribe(()=>{ y_velocity=-y_velocity; })
+
+  const collisions_enemy=interval(5).pipe(
+    filter(  _=>isCollide(paddleEnemy,ball))
+
+  )
+  .subscribe(()=>{xvelocity=-xvelocity ; console.log(ball.getAttribute('cx'))})
   var lose_msg = document.createElementNS(svg.namespaceURI,"text");
   lose_msg.setAttributeNS(null,"x","150");      
   lose_msg.setAttributeNS(null,"y","300"); 
@@ -80,7 +104,7 @@ let yvelocity: number = 0.9;
   svg.appendChild(lose_msg);
   const gameover=interval(5)
   .pipe(
-    filter(_=> scoreEnemy===7)
+    filter(_=> scoreEnemy===7||scorePlayer===7)
   )
   .subscribe(  ()=>{lose_msg.textContent="pepehands u lost :(";animate.unsubscribe(); svg.removeChild(ball);})
 
@@ -139,10 +163,29 @@ const arrowKeys$ = keydown$.pipe(
     }
     mousePosObservable();
 
-    function isCollide(a:Element, b:Element) {
-      return (
-       (Number(a.getAttribute('cx')))+Number(a.getAttribute('rx'))>Number(b.getAttribute('x'))
+    function isCollide(a:Element, b:Element):boolean {
+      var paddle=b.getBoundingClientRect();
+      return !(
+       (Number(a.getAttribute("y"))+Number(a.getAttribute('height')))<Number(b.getAttribute('cy'))||
+       (Number(a.getAttribute("y"))>Number(b.getAttribute("cy"))+Number(b.getAttribute("ry"))||
+       (Number(a.getAttribute("x")))+Number(a.getAttribute("width"))<Number(b.getAttribute('cx'))||
+       (Number(a.getAttribute("x")))>Number(b.getAttribute("cx"))+Number(b.getAttribute("rx")))
+
+      //  (Number(a.getAttribute('cy')))+Number(a.getAttribute('ry'))<paddle.top
+      //  (Number(a.getAttribute('cx')))>paddle.right||
+      //  (Number(a.getAttribute('cy')))>paddle.bottom
+
       )}
+
+    function hitWall(a:Element,b:HTMLElement){
+    
+      return (Number(a.getAttribute('cy')))<0||
+      (Number(a.getAttribute('cy')))>Number(b.getAttribute('height'))
+    }
+
+
+    
+  
     // function isCollide(a:Element, b:Element) {
     //   return !(
     //     (Number(a.attr("y")) + Number(a.attr("height"))) < Number(b.attr("cy")) ||
