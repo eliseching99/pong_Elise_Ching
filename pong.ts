@@ -6,11 +6,23 @@ function pong() {
   let scorePlayer:number= 0;
     //xvelocity is for the speed going left and right
 let xvelocity: number = 1.5;
-//yvelocity is for the speed going up and down
-let yvelocity: number = 0.9; 
+
+const audio_jump:HTMLAudioElement= new Audio('./jump.wav');
+const audio_gameover:HTMLAudioElement= new Audio('./gameover.wav')
+const audio_win:HTMLAudioElement= new Audio('./win.wav')
 
   
     const svg:HTMLElement= document.getElementById("canvas")!;
+    const middleLine:Element = document.createElementNS(svg.namespaceURI,'rect')
+    Object.entries({
+      x: svg.clientWidth/2 ,y: 0,
+      width: 5, height:svg.clientHeight,
+      fill: 'white', 
+    }).forEach(([key,val])=>middleLine.setAttribute(key,String(val)))
+    svg.appendChild(middleLine);
+
+  
+
     const paddleEnemy:Element = document.createElementNS(svg.namespaceURI,'rect')
     Object.entries({
       x: 0, y: svg.clientHeight/2-50,
@@ -44,7 +56,7 @@ let yvelocity: number = 0.9;
     //map(()=> String(Math.random()+Number(ball.getAttribute('cy')))
     let y_velocity:Number=1;
 
-    const animate_y = interval(5)
+    const animate_Enemy = interval(5)
     .pipe(
       map(()=> String(Number(y_velocity)*Math.random()+Number(ball.getAttribute('cy'))))
 
@@ -82,7 +94,7 @@ let yvelocity: number = 0.9;
     filter(  _=>isCollide(paddlePlayer,ball)),
 
   )
-  .subscribe(()=>{xvelocity=-xvelocity ;y_velocity=-y_velocity; console.log(ball.getAttribute('cx'))})
+  .subscribe(()=>{audio_jump.play();xvelocity=(1.2*-xvelocity) ;y_velocity=-y_velocity; })
 
   const collisions_wall=interval(5).pipe(
     filter(  _=>hitWall(ball,svg)),
@@ -94,19 +106,31 @@ let yvelocity: number = 0.9;
     filter(  _=>isCollide(paddleEnemy,ball))
 
   )
-  .subscribe(()=>{xvelocity=-xvelocity ; console.log(ball.getAttribute('cx'))})
+  .subscribe(()=>{xvelocity=-xvelocity ; })
   var lose_msg = document.createElementNS(svg.namespaceURI,"text");
   lose_msg.setAttributeNS(null,"x","150");      
   lose_msg.setAttributeNS(null,"y","300"); 
   lose_msg.setAttributeNS(null,"fill","red")  
   lose_msg.setAttributeNS(null,'font-size','30px')
 ;
+
+var win_msg = document.createElementNS(svg.namespaceURI,"text");
+win_msg.setAttributeNS(null,"x","150");      
+win_msg.setAttributeNS(null,"y","300"); 
+win_msg.setAttributeNS(null,"fill","red")  
+win_msg.setAttributeNS(null,'font-size','30px')
   svg.appendChild(lose_msg);
   const gameover=interval(5)
   .pipe(
     filter(_=> scoreEnemy===7||scorePlayer===7)
   )
-  .subscribe(  ()=>{lose_msg.textContent="pepehands u lost :(";animate.unsubscribe(); svg.removeChild(ball);})
+  .subscribe(  ()=>{audio_gameover.play();lose_msg.textContent="pepehands u lost :(";animate.unsubscribe(); svg.removeChild(ball);animate_Enemy.unsubscribe();svg.removeChild(middleLine)})
+
+  const win=interval(5)
+  .pipe(
+    filter(_=> scorePlayer===7)
+  )
+  .subscribe(  ()=>{audio_win.play();win_msg.textContent="Godddamn son u won";animate.unsubscribe(); svg.removeChild(ball);animate_Enemy.unsubscribe() ;svg.removeChild(middleLine)})
 
     /*const animate = setInterval(() => ball.setAttribute('cx', String(1 + Number(ball.getAttribute('cx')))), 10);
 const timer = setInterval(() => {
@@ -118,6 +142,10 @@ const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown');
 const arrowKeys$ = keydown$.pipe(
   filter(({key})=>key === 'ArrowUp' || key === 'ArrowDown'),
   filter(({repeat})=>!repeat));
+
+  const clickObservable:Observable<Event> = fromEvent(document,'click')
+  const example=clickObservable.pipe(map(event=>'Event time: ${event.timeStamp}'));
+  const subscribe= example.subscribe(val=>console.log(val));
 
           // let o =new Observable()
 
@@ -137,9 +165,7 @@ const arrowKeys$ = keydown$.pipe(
     // var enemy = document.createTextNode("Enemy: "+ scoreEnemy.toString());
     // text_enemy.appendChild(enemy);
     // svg.appendChild(text_enemy)
-    function moveBall(ball){
-
-    }
+ 
 
     function mousePosObservable() {
       const
@@ -164,7 +190,6 @@ const arrowKeys$ = keydown$.pipe(
     mousePosObservable();
 
     function isCollide(a:Element, b:Element):boolean {
-      var paddle=b.getBoundingClientRect();
       return !(
        (Number(a.getAttribute("y"))+Number(a.getAttribute('height')))<Number(b.getAttribute('cy'))||
        (Number(a.getAttribute("y"))>Number(b.getAttribute("cy"))+Number(b.getAttribute("ry"))||
@@ -179,8 +204,8 @@ const arrowKeys$ = keydown$.pipe(
 
     function hitWall(a:Element,b:HTMLElement){
     
-      return (Number(a.getAttribute('cy')))<0||
-      (Number(a.getAttribute('cy')))>Number(b.getAttribute('height'))
+      return ((Number(a.getAttribute('cy')))<0 && Number(a.getAttribute('cx'))>0) ||
+      ((Number(a.getAttribute('cy')))>Number(b.getAttribute('height')) && Number(a.getAttribute('cx'))>0)
     }
 
 
@@ -199,6 +224,7 @@ const arrowKeys$ = keydown$.pipe(
   // the following simply runs your pong function on window load.  Make sure to leave it in place.
   if (typeof window != 'undefined')
     window.onload = ()=>{
+
       pong();
     }
   
