@@ -1,18 +1,46 @@
 <html>
-    <head>
-        <style>
-            @import url(style.css);
-            p.highlight {
-                color: red;
-            }
-            svg {
-                background-color: rgb(41, 41, 36);
-            }
-        </style>
-        <script src="./dist/pong.js"></script>
-    </head>
-    <body>
-        <h1>Pong</h1>
-        <svg id="canvas" width="600" height="600"/>
-    </body>
+  <head>
+    <style>
+      @import url(style.css);
+      p.highlight {
+        color: red;
+      }
+      svg {
+        background-color: rgb(41, 41, 36);
+      }
+    </style>
+    <script src="./dist/pong.js"></script>
+  </head>
+  <body>
+    <h1>Pong</h1>
+    <svg id="canvas" width="600" height="600">
+      <!-- <foreignObject id='speedup'   width="160" height="160">
+                <img src ='lightning.png'>
+              </foreignObject> -->
+
+      <path
+        xmlns="http://www.w3.org/2000/svg"
+        stroke="#000"
+        transform="rotate(-180 300,300) "
+        id="svg_8"
+        d="m362.75936,210.56963l-11.6011,8.31036l11.45768,2.855l-10.59024,8.92189l-4.2757,-1.5066l3.03261,8.59972l12.05188,-3.752l-5.0885,-1.56832l13.8175,-12.81471l-12.63076,-2.32258l12.19704,-8.65952l-6.95742,-1.30018l7.57768,-5.50358l-2.78372,-0.07909l-11.75905,7.55032l5.5521,1.26931l0,0z"
+        stroke-opacity="null"
+        stroke-width="1.5"
+        fill="#efef28"
+        height="50px"
+        width="50px"
+      />
+
+      <path
+        xmlns="http://www.w3.org/2000/svg"
+        id="svg_1"
+        d="m259.20248,148.67555l9.25372,0l0,-9.9147l9.49256,0l0,9.9147l9.25373,0l0,10.1706l-9.25373,0l0,9.9147l-9.49256,0l0,-9.9147l-9.25372,0l0,-10.1706z"
+        stroke-width="1.5"
+        stroke="#000"
+        fill="#aaffaa"
+        height="50px"
+        width="50px"
+      />
+    </svg>
+  </body>
 </html>
