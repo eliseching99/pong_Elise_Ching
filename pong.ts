@@ -21,6 +21,24 @@ const audio_win:HTMLAudioElement= new Audio('./win.wav')
     }).forEach(([key,val])=>middleLine.setAttribute(key,String(val)))
     svg.appendChild(middleLine);
 
+    const speed_up:Element = document.createElement('img')
+    Object.entries({
+      x: Math.floor(Math.random() * svg.clientWidth) ,y:  Math.floor(Math.random() * svg.clientHeight),
+      width: 5, height:5,
+      fill: 'white', 
+      src:'./lightning.png'
+    }).forEach(([key,val])=>speed_up.setAttribute(key,String(val)))
+    svg.appendChild(speed_up);
+    function GFG_Fun() { 
+      var img = document.createElement('img'); 
+      img.src =  
+'lightning.png'; 
+img.width=10;
+img.height=10;
+
+      svg.appendChild(img); 
+  }  
+  GFG_Fun()
   
 
     const paddleEnemy:Element = document.createElementNS(svg.namespaceURI,'rect')
